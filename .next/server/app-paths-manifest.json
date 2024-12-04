@@ -1,6 +1,0 @@
-{
-  "/page": "app/page.js",
-  "/account/page": "app/account/page.js",
-  "/clusters/page": "app/clusters/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js"
-}
