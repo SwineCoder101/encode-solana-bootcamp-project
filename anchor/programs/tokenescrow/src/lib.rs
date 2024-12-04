@@ -2,6 +2,12 @@
 
 use anchor_lang::prelude::*;
 
+pub mod state;
+pub mod instructions;
+
+use instructions::owner::*;
+
+
 declare_id!("AsjZ3kWAUSQRNt2pZVeJkywhZ6gpLpHZmJjduPmKZDZZ");
 
 #[program]
@@ -10,6 +16,15 @@ pub mod tokenescrow {
 
   pub fn close(_ctx: Context<CloseTokenescrow>) -> Result<()> {
     Ok(())
+  }
+
+
+  pub fn create_config(ctx: Context<CreateConfig>) -> Result<()> {
+    run_create_config(ctx)
+  }
+
+  pub fn update_config(ctx: Context<UpdateConfig>, owner: Pubkey, status: Status) -> Result<()> {
+      run_update_config(ctx, owner, status)
   }
 
   pub fn decrement(ctx: Context<Update>) -> Result<()> {
