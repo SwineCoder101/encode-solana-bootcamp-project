@@ -8,4 +8,11 @@ pub fn transfer_tokens<'info>(
     mint:&InterfaceAccount<'info,Mint>,
     authority:&Signer<'info>,
     token_program: &Interface<'info,TokenInterface>
-) ->Result<()>{}
+) ->Result<()>{
+    let transfer_accounts_options =TransferChecked{
+        from: from.to_account_info(),
+        mint: mint.to_account_info(),
+        to: to.to_account_info(),
+        authority: authority.to_account_info(),
+    }
+}
