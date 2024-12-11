@@ -2,22 +2,22 @@
 
 use anchor_lang::prelude::*;
 
-pub mod state;
 pub mod instructions;
-
 use instructions::owner::*;
-
+pub mod state;
+use crate::state::config::Status;
 
 declare_id!("AsjZ3kWAUSQRNt2pZVeJkywhZ6gpLpHZmJjduPmKZDZZ");
 
 #[program]
 pub mod tokenescrow {
+    use state::config::Status;
+
     use super::*;
 
   pub fn close(_ctx: Context<CloseTokenescrow>) -> Result<()> {
     Ok(())
   }
-
 
   pub fn create_config(ctx: Context<CreateConfig>) -> Result<()> {
     run_create_config(ctx)
@@ -25,16 +25,6 @@ pub mod tokenescrow {
 
   pub fn update_config(ctx: Context<UpdateConfig>, owner: Pubkey, status: Status) -> Result<()> {
       run_update_config(ctx, owner, status)
-  }
-
-  pub fn decrement(ctx: Context<Update>) -> Result<()> {
-    ctx.accounts.tokenescrow.count = ctx.accounts.tokenescrow.count.checked_sub(1).unwrap();
-    Ok(())
-  }
-
-  pub fn increment(ctx: Context<Update>) -> Result<()> {
-    ctx.accounts.tokenescrow.count = ctx.accounts.tokenescrow.count.checked_add(1).unwrap();
-    Ok(())
   }
 
   pub fn initialize(_ctx: Context<InitializeTokenescrow>) -> Result<()> {

@@ -1,15 +1,15 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { TokenEscrow } from "../target/types/token_escrow";
-import { createConfig, updateConfig, getConfig } from "../sdk";
+import { Tokenescrow } from "../target/types/tokenescrow";
+import { createConfig, getConfig, updateConfig } from "../sdk/src"; // Adjust the path as needed
 
 describe("token-escrow", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
-  const program = anchor.workspace.TokenEscrow as Program<TokenEscrow>;
+  const program = anchor.workspace.Tokenescrow as Program<Tokenescrow>;
 
   const user = anchor.web3.Keypair.generate();
-  let configPubkey;
+  let configPubkey: anchor.web3.PublicKey;
 
   it("Creates a config", async () => {
     await createConfig(program, user);
