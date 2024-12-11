@@ -39,41 +39,31 @@ export type Tokenescrow = {
       "args": []
     },
     {
-      "name": "decrement",
+      "name": "createConfig",
       "discriminator": [
-        106,
-        227,
-        168,
-        59,
-        248,
-        27,
-        150,
-        101
+        201,
+        207,
+        243,
+        114,
+        75,
+        111,
+        47,
+        189
       ],
       "accounts": [
         {
-          "name": "tokenescrow",
-          "writable": true
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "increment",
-      "discriminator": [
-        11,
-        18,
-        104,
-        9,
-        104,
-        174,
-        59,
-        33
-      ],
-      "accounts": [
+          "name": "config",
+          "writable": true,
+          "signer": true
+        },
         {
-          "name": "tokenescrow",
-          "writable": true
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
@@ -132,24 +122,121 @@ export type Tokenescrow = {
           "type": "u8"
         }
       ]
+    },
+    {
+      "name": "updateConfig",
+      "discriminator": [
+        29,
+        158,
+        252,
+        191,
+        10,
+        83,
+        219,
+        99
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "writable": true
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "owner",
+          "type": "pubkey"
+        },
+        {
+          "name": "status",
+          "type": {
+            "defined": {
+              "name": "status"
+            }
+          }
+        }
+      ]
     }
   ],
   "accounts": [
     {
+      "name": "config",
+      "discriminator": [
+        155,
+        12,
+        170,
+        224,
+        30,
+        250,
+        204,
+        130
+      ]
+    },
+    {
       "name": "tokenescrow",
       "discriminator": [
-        255,
-        176,
-        4,
-        245,
-        188,
-        253,
-        124,
-        25
+        126,
+        147,
+        202,
+        127,
+        129,
+        238,
+        95,
+        208
       ]
     }
   ],
   "types": [
+    {
+      "name": "config",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "creationTimestamp",
+            "type": "i64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "status"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "status",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "pending"
+          },
+          {
+            "name": "active"
+          },
+          {
+            "name": "cancelled"
+          },
+          {
+            "name": "complete"
+          }
+        ]
+      }
+    },
     {
       "name": "tokenescrow",
       "type": {

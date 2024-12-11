@@ -9,6 +9,7 @@ pub struct Config {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug, PartialEq)]
 pub enum Status {
+    Pending,
     Active,
     Cancelled,
     Complete,
