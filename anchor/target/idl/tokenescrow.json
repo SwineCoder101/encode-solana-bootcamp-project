@@ -48,10 +48,24 @@
         {
           "name": "config",
           "writable": true,
-          "signer": true
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
         },
         {
-          "name": "user",
+          "name": "authority",
           "writable": true,
           "signer": true
         },
@@ -60,7 +74,16 @@
           "address": "11111111111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "escrow_id",
+          "type": "u8"
+        },
+        {
+          "name": "settlement_amount",
+          "type": "u64"
+        }
+      ]
     },
     {
       "name": "initialize",
@@ -132,10 +155,30 @@
       "accounts": [
         {
           "name": "config",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.escrow_id",
+                "account": "Config"
+              }
+            ]
+          }
         },
         {
-          "name": "owner",
+          "name": "authority",
           "signer": true,
           "relations": [
             "config"
@@ -144,16 +187,20 @@
       ],
       "args": [
         {
-          "name": "owner",
-          "type": "pubkey"
-        },
-        {
-          "name": "status",
+          "name": "new_status",
           "type": {
             "defined": {
               "name": "Status"
             }
           }
+        },
+        {
+          "name": "new_settlement_amount",
+          "type": "u64"
+        },
+        {
+          "name": "new_authority",
+          "type": "pubkey"
         }
       ]
     }
@@ -162,14 +209,14 @@
     {
       "name": "Config",
       "discriminator": [
-        155,
-        12,
-        170,
-        224,
-        30,
-        250,
-        204,
-        130
+        94,
+        172,
+        216,
+        185,
+        176,
+        85,
+        220,
+        15
       ]
     },
     {
@@ -193,7 +240,7 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "owner",
+            "name": "authority",
             "type": "pubkey"
           },
           {
@@ -207,6 +254,14 @@
                 "name": "Status"
               }
             }
+          },
+          {
+            "name": "escrow_id",
+            "type": "u8"
+          },
+          {
+            "name": "settlement_amount",
+            "type": "u64"
           }
         ]
       }

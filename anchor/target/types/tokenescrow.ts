@@ -54,10 +54,24 @@ export type Tokenescrow = {
         {
           "name": "config",
           "writable": true,
-          "signer": true
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
         },
         {
-          "name": "user",
+          "name": "authority",
           "writable": true,
           "signer": true
         },
@@ -66,7 +80,16 @@ export type Tokenescrow = {
           "address": "11111111111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "escrowId",
+          "type": "u8"
+        },
+        {
+          "name": "settlementAmount",
+          "type": "u64"
+        }
+      ]
     },
     {
       "name": "initialize",
@@ -138,10 +161,30 @@ export type Tokenescrow = {
       "accounts": [
         {
           "name": "config",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.escrow_id",
+                "account": "config"
+              }
+            ]
+          }
         },
         {
-          "name": "owner",
+          "name": "authority",
           "signer": true,
           "relations": [
             "config"
@@ -150,16 +193,20 @@ export type Tokenescrow = {
       ],
       "args": [
         {
-          "name": "owner",
-          "type": "pubkey"
-        },
-        {
-          "name": "status",
+          "name": "newStatus",
           "type": {
             "defined": {
               "name": "status"
             }
           }
+        },
+        {
+          "name": "newSettlementAmount",
+          "type": "u64"
+        },
+        {
+          "name": "newAuthority",
+          "type": "pubkey"
         }
       ]
     }
@@ -168,14 +215,14 @@ export type Tokenescrow = {
     {
       "name": "config",
       "discriminator": [
-        155,
-        12,
-        170,
-        224,
-        30,
-        250,
-        204,
-        130
+        94,
+        172,
+        216,
+        185,
+        176,
+        85,
+        220,
+        15
       ]
     },
     {
@@ -199,7 +246,7 @@ export type Tokenescrow = {
         "kind": "struct",
         "fields": [
           {
-            "name": "owner",
+            "name": "authority",
             "type": "pubkey"
           },
           {
@@ -213,6 +260,14 @@ export type Tokenescrow = {
                 "name": "status"
               }
             }
+          },
+          {
+            "name": "escrowId",
+            "type": "u8"
+          },
+          {
+            "name": "settlementAmount",
+            "type": "u64"
           }
         ]
       }
