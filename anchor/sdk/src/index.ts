@@ -1,3 +1,3 @@
-export * from "./instructions/createConfig";
-export * from "./instructions/updateConfig";
-export * from "./accounts/getConfig";
+export * from "./instructions/create-config";
+export * from "./instructions/update-config";
+export * from "./accounts/config-account";
