@@ -18,8 +18,8 @@ impl anchor_lang::Owner for Config {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug, PartialEq,InitSpace)]
 pub enum Status {
-    Pending,
-    Active,
-    Cancelled,
-    Complete,
+    Pending = 0,
+    Active = 1,
+    Cancelled = 2,
+    Complete = 3,
 }
