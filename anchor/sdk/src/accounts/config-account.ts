@@ -14,6 +14,16 @@ export type ConfigData = {
   settlementAmount: number;
 };
 
+export type CreateConfigData = {
+  escrowId: number;
+  settlementAmount: number;
+}
+
+export type CreateConfigProgramData = {
+  escrowId: number;
+  settlementAmount: BN;
+}
+
 //new_status: Status, new_settlement_amount: u64, new_authority: Pubkey
 export type UpdateConfigData = {
   newStatus: Status;
@@ -25,29 +35,44 @@ export type UpdateConfigData = {
 export type ConfigProgramData = {
   authority: PublicKey;
   creationTimestamp: BN;
-  status: Status;
+  status: StatusProgram;
   escrowId: number;
   settlementAmount: BN;
 };
 
 export type UpdateConfigProgramData = {
-  newStatus: Status;
+  newStatus: StatusProgram;
   newSettlementAmount: BN;
   newAuthority: PublicKey;
 };
 
 export enum Status {
-  Pending,
-  Active,
-  Cancelled,
-  Complete,
+  Pending = 0,
+  Active = 1,
+  Cancelled = 2,
+  Complete = 3,
+}
+
+export type StatusProgram =
+  | { pending: {} }
+  | { active: {} }
+  | { cancelled: {} }
+  | { complete: {} };
+
+export const convertCreateConfigDataToProgramData = (data: CreateConfigData): CreateConfigProgramData => {
+  return {
+    escrowId: data.escrowId,
+    settlementAmount: new BN(data.settlementAmount),
+  };
 }
 
 export const convertConfigDataToProgramData = (data: ConfigData): ConfigProgramData => {
+  const status = statusToProgramStatus(data.status);
+  
   return {
     authority: new PublicKey(data.authority),
     creationTimestamp: new BN(data.creationTimestamp),
-    status: data.status,
+    status,
     escrowId: data.escrowId,
     settlementAmount: new BN(data.settlementAmount),
   };
@@ -64,20 +89,55 @@ export const convertConfigProgramDataToData = (programData: ConfigProgramData): 
 };
 
 export const convertUpdateConfigDataToProgramData = (data: UpdateConfigData): UpdateConfigProgramData => {
+  
+  const newStatus = statusToProgramStatus(data.newStatus);
+  
   return {
-    newStatus: data.newStatus,
+    newStatus,
     newSettlementAmount: new BN(data.newSettlementAmount),
     newAuthority: new PublicKey(data.newAuthority),
   };
 };
 
 export const convertUpdateConfigProgramDataToData = (programData: UpdateConfigProgramData): UpdateConfigData => {
+  
+  const newStatus = programToStatus(programData.newStatus);
+  
   return {
-    newStatus: programData.newStatus,
+    newStatus,
     newSettlementAmount: programData.newSettlementAmount.toNumber(),
     newAuthority: programData.newAuthority.toString(),
   };
 };
+
+export function programToStatus(programStatus: StatusProgram): Status {
+  if ("pending" in programStatus) {
+    return Status.Pending;
+  } else if ("active" in programStatus) {
+    return Status.Active;
+  } else if ("cancelled" in programStatus) {
+    return Status.Cancelled;
+  } else if ("complete" in programStatus) {
+    return Status.Complete;
+  } else {
+    throw new Error("Invalid Status value");
+  }
+}
+
+export function statusToProgramStatus(status: Status): StatusProgram {
+  switch (status) {
+    case Status.Pending:
+      return { pending: {} };
+    case Status.Active:
+      return { active: {} };
+    case Status.Cancelled:
+      return { cancelled: {} };
+    case Status.Complete:
+      return { complete: {} };
+    default:
+      throw new Error("Invalid Status value");
+  }
+}
 
 //------------------------------------------------------- Data Finders
 export const findConfigAddress = (programId?: string): string => {
@@ -91,10 +151,11 @@ export const findConfigAddress = (programId?: string): string => {
 export async function getConfigData(program: Program<Tokenescrow>) {
   let configAddress = findConfigAddress(program.programId.toString());
   const fetchedData = await program.account.config.fetch(configAddress);
+
   const programData: ConfigProgramData = {
     authority: fetchedData.authority,
     creationTimestamp: fetchedData.creationTimestamp,
-    status: Status[fetchedData.status.toString().toUpperCase() as keyof typeof Status],
+    status: fetchedData.status,
     escrowId: fetchedData.escrowId,
     settlementAmount: fetchedData.settlementAmount,
   };

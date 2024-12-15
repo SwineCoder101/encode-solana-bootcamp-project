@@ -1,25 +1,26 @@
 import { SystemProgram, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
-import { ConfigData, convertConfigDataToProgramData, findConfigAddress } from "../accounts/config-account";
+import { convertCreateConfigDataToProgramData, CreateConfigData, findConfigAddress } from "../accounts/config-account";
 import { SdkConfig } from "../types";
 
 export async function createConfig({
-  configData,
+  createConfigData,
   sdkConfig,
 }: {
-  configData: ConfigData;
+  createConfigData: CreateConfigData;
   sdkConfig: SdkConfig;
 }) {
+  
   // Convert ConfigData to ConfigProgramData structure
-  let configProgramData = convertConfigDataToProgramData(configData);
+  let createConfigProgramData = convertCreateConfigDataToProgramData(createConfigData);
   let [config, _] = findConfigAddress(sdkConfig.program.programId.toString());
 
   if (sdkConfig.debug) console.log("config", config.toString());
-  if (sdkConfig.debug) console.log("configData", configData);
-  if (sdkConfig.debug) console.log("configProgramData", configProgramData);
+  if (sdkConfig.debug) console.log("createConfigData", createConfigData);
+  if (sdkConfig.debug) console.log("createConfigProgramData", createConfigProgramData);
 
   // Create instruction
   const ix = await sdkConfig.program.methods
-    .createConfig(configProgramData.escrowId, configProgramData.settlementAmount)
+    .createConfig(createConfigProgramData.escrowId, createConfigProgramData.settlementAmount)
     .accountsStrict({
       config,
       authority: sdkConfig.signer.publicKey,
