@@ -300,3 +300,152 @@
     }
   ]
 }
+
+/* Added by Aaron Ong,Blocker. Maybe of use
+import * as anchor from "@coral-xyz/anchor";
+import { Program } from "@coral-xyz/anchor";
+import { DepositDapp } from "../target/types/deposit_dapp";
+import { assert } from "chai";
+
+describe("deposit_dapp", () => {
+  // Configure the client to use the local cluster.
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+
+  const program = anchor.workspace.DepositDapp as Program<DepositDapp>;
+  
+  // Generate keypairs for testing
+  const authority = anchor.web3.Keypair.generate();
+  const depositor = anchor.web3.Keypair.generate();
+  let depositAccountPda: anchor.web3.PublicKey;
+
+  before(async () => {
+    // Airdrop SOL to test accounts
+    await provider.connection.requestAirdrop(
+      authority.publicKey, 
+      anchor.web3.LAMPORTS_PER_SOL
+    );
+    await provider.connection.requestAirdrop(
+      depositor.publicKey, 
+      anchor.web3.LAMPORTS_PER_SOL
+    );
+  });
+
+  it("should initialize deposit account", async () => {
+    // Find PDA for deposit account
+    const [pda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("deposit_account"), authority.publicKey.toBuffer()],
+      program.programId
+    );
+    depositAccountPda = pda;
+
+    // Initialize deposit account
+    await program.methods
+      .initializeDepositAccount(authority.publicKey)
+      .accounts({
+        authority: authority.publicKey,
+        depositAccount: depositAccountPda,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .signers([authority])
+      .rpc();
+
+    // Fetch account and verify
+    const accountData = await program.account.depositData.fetch(depositAccountPda);
+    assert.isTrue(accountData.authority.equals(authority.publicKey));
+    assert.equal(accountData.balance.toNumber(), 0);
+  });
+
+  it("should deposit funds", async () => {
+    const depositAmount = new anchor.BN(100);
+
+    await program.methods
+      .deposit(depositAmount)
+      .accounts({
+        depositAccount: depositAccountPda,
+        transferAccount: authority.publicKey,
+      })
+      .signers([authority])
+      .rpc();
+
+    // Verify balance updated
+    const accountData = await program.account.depositData.fetch(depositAccountPda);
+    assert.equal(accountData.balance.toNumber(), 100);
+  });
+
+  it("should prevent unauthorized deposit", async () => {
+    const depositAmount = new anchor.BN(50);
+
+    try {
+      await program.methods
+        .deposit(depositAmount)
+        .accounts({
+          depositAccount: depositAccountPda,
+          transferAccount: depositor.publicKey,
+        })
+        .signers([depositor])
+        .rpc();
+      
+      // Should not reach here
+      assert.fail("Unauthorized deposit should fail");
+    } catch (error) {
+      assert.include(
+        error.message, 
+        "Unauthorized depositor"
+      );
+    }
+  });
+
+  it("should withdraw funds", async () => {
+    const withdrawAmount = new anchor.BN(50);
+
+    await program.methods
+      .withdraw(withdrawAmount)
+      .accounts({
+        depositAccount: depositAccountPda,
+        user: authority.publicKey,
+      })
+      .signers([authority])
+      .rpc();
+
+    // Verify balance updated
+    const accountData = await program.account.depositData.fetch(depositAccountPda);
+    assert.equal(accountData.balance.toNumber(), 50);
+  });
+
+  it("should check balance", async () => {
+    const balance = await program.methods
+      .getBalance()
+      .accounts({
+        depositAccount: depositAccountPda,
+      })
+      .view();
+
+    assert.equal(balance.toNumber(), 50);
+  });
+
+  it("should prevent overdraft withdrawal", async () => {
+    const overdraftAmount = new anchor.BN(100);
+
+    try {
+      await program.methods
+        .withdraw(overdraftAmount)
+        .accounts({
+          depositAccount: depositAccountPda,
+          user: authority.publicKey,
+        })
+        .signers([authority])
+        .rpc();
+      
+      // Should not reach here
+      assert.fail("Overdraft withdrawal should fail");
+    } catch (error) {
+      assert.include(
+        error.message, 
+        "Insufficient balance"
+      );
+    }
+  });
+});
+
+*/
