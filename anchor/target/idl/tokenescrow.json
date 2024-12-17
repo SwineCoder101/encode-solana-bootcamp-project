@@ -33,44 +33,57 @@
       "args": []
     },
     {
-      "name": "decrement",
+      "name": "create_config",
       "discriminator": [
-        106,
-        227,
-        168,
-        59,
-        248,
-        27,
-        150,
-        101
+        201,
+        207,
+        243,
+        114,
+        75,
+        111,
+        47,
+        189
       ],
       "accounts": [
         {
-          "name": "tokenescrow",
-          "writable": true
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "increment",
-      "discriminator": [
-        11,
-        18,
-        104,
-        9,
-        104,
-        174,
-        59,
-        33
-      ],
-      "accounts": [
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
         {
-          "name": "tokenescrow",
-          "writable": true
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "escrow_id",
+          "type": "u8"
+        },
+        {
+          "name": "settlement_amount",
+          "type": "u64"
+        }
+      ]
     },
     {
       "name": "initialize",
@@ -126,24 +139,153 @@
           "type": "u8"
         }
       ]
+    },
+    {
+      "name": "update_config",
+      "discriminator": [
+        29,
+        158,
+        252,
+        191,
+        10,
+        83,
+        219,
+        99
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.escrow_id",
+                "account": "Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "new_status",
+          "type": {
+            "defined": {
+              "name": "Status"
+            }
+          }
+        },
+        {
+          "name": "new_settlement_amount",
+          "type": "u64"
+        },
+        {
+          "name": "new_authority",
+          "type": "pubkey"
+        }
+      ]
     }
   ],
   "accounts": [
     {
+      "name": "Config",
+      "discriminator": [
+        94,
+        172,
+        216,
+        185,
+        176,
+        85,
+        220,
+        15
+      ]
+    },
+    {
       "name": "Tokenescrow",
       "discriminator": [
-        255,
-        176,
-        4,
-        245,
-        188,
-        253,
-        124,
-        25
+        126,
+        147,
+        202,
+        127,
+        129,
+        238,
+        95,
+        208
       ]
     }
   ],
   "types": [
+    {
+      "name": "Config",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "creation_timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "Status"
+              }
+            }
+          },
+          {
+            "name": "escrow_id",
+            "type": "u8"
+          },
+          {
+            "name": "settlement_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Status",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Cancelled"
+          },
+          {
+            "name": "Complete"
+          }
+        ]
+      }
+    },
     {
       "name": "Tokenescrow",
       "type": {
@@ -158,3 +300,152 @@
     }
   ]
 }
+
+/* Added by Aaron Ong,Blocker. Maybe of use
+import * as anchor from "@coral-xyz/anchor";
+import { Program } from "@coral-xyz/anchor";
+import { DepositDapp } from "../target/types/deposit_dapp";
+import { assert } from "chai";
+
+describe("deposit_dapp", () => {
+  // Configure the client to use the local cluster.
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+
+  const program = anchor.workspace.DepositDapp as Program<DepositDapp>;
+  
+  // Generate keypairs for testing
+  const authority = anchor.web3.Keypair.generate();
+  const depositor = anchor.web3.Keypair.generate();
+  let depositAccountPda: anchor.web3.PublicKey;
+
+  before(async () => {
+    // Airdrop SOL to test accounts
+    await provider.connection.requestAirdrop(
+      authority.publicKey, 
+      anchor.web3.LAMPORTS_PER_SOL
+    );
+    await provider.connection.requestAirdrop(
+      depositor.publicKey, 
+      anchor.web3.LAMPORTS_PER_SOL
+    );
+  });
+
+  it("should initialize deposit account", async () => {
+    // Find PDA for deposit account
+    const [pda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("deposit_account"), authority.publicKey.toBuffer()],
+      program.programId
+    );
+    depositAccountPda = pda;
+
+    // Initialize deposit account
+    await program.methods
+      .initializeDepositAccount(authority.publicKey)
+      .accounts({
+        authority: authority.publicKey,
+        depositAccount: depositAccountPda,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .signers([authority])
+      .rpc();
+
+    // Fetch account and verify
+    const accountData = await program.account.depositData.fetch(depositAccountPda);
+    assert.isTrue(accountData.authority.equals(authority.publicKey));
+    assert.equal(accountData.balance.toNumber(), 0);
+  });
+
+  it("should deposit funds", async () => {
+    const depositAmount = new anchor.BN(100);
+
+    await program.methods
+      .deposit(depositAmount)
+      .accounts({
+        depositAccount: depositAccountPda,
+        transferAccount: authority.publicKey,
+      })
+      .signers([authority])
+      .rpc();
+
+    // Verify balance updated
+    const accountData = await program.account.depositData.fetch(depositAccountPda);
+    assert.equal(accountData.balance.toNumber(), 100);
+  });
+
+  it("should prevent unauthorized deposit", async () => {
+    const depositAmount = new anchor.BN(50);
+
+    try {
+      await program.methods
+        .deposit(depositAmount)
+        .accounts({
+          depositAccount: depositAccountPda,
+          transferAccount: depositor.publicKey,
+        })
+        .signers([depositor])
+        .rpc();
+      
+      // Should not reach here
+      assert.fail("Unauthorized deposit should fail");
+    } catch (error) {
+      assert.include(
+        error.message, 
+        "Unauthorized depositor"
+      );
+    }
+  });
+
+  it("should withdraw funds", async () => {
+    const withdrawAmount = new anchor.BN(50);
+
+    await program.methods
+      .withdraw(withdrawAmount)
+      .accounts({
+        depositAccount: depositAccountPda,
+        user: authority.publicKey,
+      })
+      .signers([authority])
+      .rpc();
+
+    // Verify balance updated
+    const accountData = await program.account.depositData.fetch(depositAccountPda);
+    assert.equal(accountData.balance.toNumber(), 50);
+  });
+
+  it("should check balance", async () => {
+    const balance = await program.methods
+      .getBalance()
+      .accounts({
+        depositAccount: depositAccountPda,
+      })
+      .view();
+
+    assert.equal(balance.toNumber(), 50);
+  });
+
+  it("should prevent overdraft withdrawal", async () => {
+    const overdraftAmount = new anchor.BN(100);
+
+    try {
+      await program.methods
+        .withdraw(overdraftAmount)
+        .accounts({
+          depositAccount: depositAccountPda,
+          user: authority.publicKey,
+        })
+        .signers([authority])
+        .rpc();
+      
+      // Should not reach here
+      assert.fail("Overdraft withdrawal should fail");
+    } catch (error) {
+      assert.include(
+        error.message, 
+        "Insufficient balance"
+      );
+    }
+  });
+});
+
+*/
