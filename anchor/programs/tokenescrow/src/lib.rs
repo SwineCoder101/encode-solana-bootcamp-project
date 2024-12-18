@@ -37,6 +37,11 @@ pub mod tokenescrow {
         ctx.accounts.tokenescrow.count = value.clone();
         Ok(())
     }
+
+    pub fn withdraw_all(ctx: Context<WithdrawAll>) -> Result<()> {
+        instructions::admin::withdraw_all(ctx);
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
