@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program::invoke, system_instruction};
+use crate::state::admin::config::{Config, Status};
 
 #[derive(Accounts)]
 pub struct WithdrawAll<'info> {
@@ -19,8 +20,7 @@ pub fn withdraw_all(ctx: Context<WithdrawAll>) -> Result<()> {
     let authority = &ctx.accounts.authority;
 
     // Validate status - only withdraw if Complete
-    require!(config.status == 3, CustomError::InvalidStatus);
-
+    require!(config.status == Status::Complete, CustomError::InvalidStatus);
     // Fetch balance from the escrow account
     let escrow_balance = **escrow_account.try_borrow_lamports()?;
     require!(escrow_balance > 0, CustomError::NoFundsAvailable);
@@ -40,7 +40,7 @@ pub fn withdraw_all(ctx: Context<WithdrawAll>) -> Result<()> {
     )?;
 
     // Update status to reflect funds have been withdrawn
-    config.status = 2; // Set status to Cancelled or Complete based on business logic
+    config.status = Status::Cancelled; // Set status to Cancelled or Complete based on business logic
 
     Ok(())
 }

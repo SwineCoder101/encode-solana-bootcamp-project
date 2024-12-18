@@ -39,7 +39,7 @@ pub mod tokenescrow {
     }
 
     pub fn withdraw_all(ctx: Context<WithdrawAll>) -> Result<()> {
-        instructions::admin::withdraw_all(ctx);
+        instructions::admin::withdraw_all(ctx)?;
         Ok(())
     }
 }

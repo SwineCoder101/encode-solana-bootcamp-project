@@ -209,6 +209,42 @@ export type Tokenescrow = {
           "type": "pubkey"
         }
       ]
+    },
+    {
+      "name": "withdrawAll",
+      "discriminator": [
+        96,
+        246,
+        166,
+        130,
+        229,
+        50,
+        43,
+        70
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "config",
+          "writable": true
+        },
+        {
+          "name": "escrowAccount",
+          "writable": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -237,6 +273,18 @@ export type Tokenescrow = {
         95,
         208
       ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "invalidStatus",
+      "msg": "Invalid status for withdrawal."
+    },
+    {
+      "code": 6001,
+      "name": "noFundsAvailable",
+      "msg": "No funds available in escrow account."
     }
   ],
   "types": [
