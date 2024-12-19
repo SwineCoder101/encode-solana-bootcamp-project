@@ -1,14 +1,16 @@
 import { Account, createTransferInstruction, getAccount, getOrCreateAssociatedTokenAccount, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
 import { Connection, Keypair, PublicKey, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
-
+import dotenv from 'dotenv';
 const { LAMPORTS_PER_SOL } = require('@solana/web3.js').LAMPORTS_PER_SOL;
+
+
 
 /**
  * Load the keypair from the environment variable.
  * @returns {Keypair} The Solana keypair.
  */
 export const getKeypair = (): Keypair => {
-
+    dotenv.config();
     const secretKeyString = process.env.KEYPAIR_SECRET;
 
     if (!secretKeyString) {
