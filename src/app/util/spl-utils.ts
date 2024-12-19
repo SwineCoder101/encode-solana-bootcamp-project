@@ -1,5 +1,6 @@
-import { Account, createTransferInstruction, getAccount, getOrCreateAssociatedTokenAccount, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
-import { Connection, Keypair, PublicKey, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { Account, createTransferInstruction, getAccount, getOrCreateAssociatedTokenAccount, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { SendTransactionOptions } from '@solana/wallet-adapter-base';
+import { Connection, Keypair, PublicKey, Transaction, TransactionMessage, TransactionSignature, VersionedTransaction } from '@solana/web3.js';
 import dotenv from 'dotenv';
 const { LAMPORTS_PER_SOL } = require('@solana/web3.js').LAMPORTS_PER_SOL;
 
@@ -34,6 +35,10 @@ export const getConnection = (): Connection => {
 };
 
 
+export const fetchTokenBalance = (mintAddress: PublicKey, publicKey: PublicKey, connection: Connection) => {
+    
+}
+
 const DEVNET_TOKEN_PROGRAM = new PublicKey('TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb');
 
 
@@ -46,14 +51,18 @@ const DEVNET_TOKEN_PROGRAM = new PublicKey('TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCX
  */
 export const getTokenAccountInfo = async (connection: Connection, publicKey: PublicKey, mintAddress: PublicKey): Promise<Account> => {
     try {
+
+
         const tokenAccounts = await connection.getTokenAccountsByOwner(publicKey, {
             mint: mintAddress,
-            programId: TOKEN_2022_PROGRAM_ID,
+            programId: TOKEN_PROGRAM_ID,
         });
 
         console.log('tokenAccounts:', tokenAccounts);
 
-        const accountInfo = await getAccount(connection, tokenAccounts.value[0].pubkey, 'confirmed', TOKEN_2022_PROGRAM_ID);
+        console.log('tokenAccounts.value[0].pubkey:', tokenAccounts.value[0].pubkey.toBase58());
+
+        const accountInfo = await getAccount(connection, tokenAccounts.value[0].pubkey, 'confirmed', TOKEN_PROGRAM_ID);
         if (!accountInfo.owner.equals(publicKey)) {
             console.error(`Token account owner mismatch: expected ${publicKey.toBase58()}, got ${accountInfo.owner.toBase58()}`);
             throw new Error('TokenInvalidAccountOwnerError');
@@ -75,7 +84,6 @@ export const getTokenAccountInfo = async (connection: Connection, publicKey: Pub
  */
 export const getTokenBalance = async (connection: Connection, publicKey: PublicKey, mintAddress: PublicKey): Promise<number> => {
     try {
-
         const accountInfo = await getTokenAccountInfo(connection, publicKey, mintAddress);
         if (!accountInfo.owner.equals(publicKey)) {
             console.error(`Token account owner mismatch: expected ${publicKey.toBase58()}, got ${accountInfo.owner.toBase58()}`);
@@ -249,16 +257,19 @@ export const transferMultipleTokens = async (
  * @param {number} amount - The amount of tokens to transfer.
  * @returns {Promise<string>} The transaction signature.
  */
+// const sendTransaction: (transaction: Transaction | VersionedTransaction, connection: Connection, options?: SendTransactionOptions) => Promise<TransactionSignature>
 export const transferTokens = async (
     connection: Connection,
-    payerKey: Keypair,
-    fromKeypair: Keypair,
+    fromKeypair: PublicKey,
     toPublicKey: PublicKey,
     mintAddress: PublicKey,
-    amount: number
+    amount: number,
+    sendTransaction: (transaction: Transaction | VersionedTransaction, connection: Connection, options?: SendTransactionOptions) => Promise<TransactionSignature>,
+    signMessage: ((message: Uint8Array) => Promise<Uint8Array>) | undefined    ,
 ): Promise<string> => {
     try {
-        console.log('fromKeypair.publicKey:', fromKeypair.publicKey.toBase58());
+        const payerKey = getKeypair();
+        console.log('fromKeypair.publicKey:', fromKeypair.toBase58());
         console.log('toPublicKey:', toPublicKey.toBase58());
         console.log('mintAddress:', mintAddress.toBase58());
         console.log('payerKey.publicKey:', payerKey.publicKey.toBase58());
@@ -268,7 +279,7 @@ export const transferTokens = async (
             connection,
             payerKey,
             mintAddress,
-            fromKeypair.publicKey,
+            fromKeypair,
             false,
             'confirmed',
             undefined,
@@ -295,7 +306,7 @@ export const transferTokens = async (
         const transferInstruction = createTransferInstruction(
             fromTokenAccount.address,
             toTokenAccount.address,
-            fromKeypair.publicKey,
+            fromKeypair,
             amountInSmallestUnit,
             [],
             TOKEN_2022_PROGRAM_ID
@@ -311,10 +322,12 @@ export const transferTokens = async (
         const transaction = new VersionedTransaction(message);
         transaction.sign([payerKey, fromKeypair]);
 
-        const signature = await connection.sendTransaction(transaction, {
-            skipPreflight: false,
-            preflightCommitment: 'confirmed'
-        });
+        // const signature = await connection.sendTransaction(transaction, {
+        //     skipPreflight: false,
+        //     preflightCommitment: 'confirmed'
+        // });
+
+        const signature = await sendTransaction(transaction, connection);
 
         // Wait for confirmation
         const confirmation = await connection.confirmTransaction({

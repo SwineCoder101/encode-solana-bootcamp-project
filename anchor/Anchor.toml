@@ -12,7 +12,7 @@ tokenescrow = "AsjZ3kWAUSQRNt2pZVeJkywhZ6gpLpHZmJjduPmKZDZZ"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "https://api.devnet.solana.com"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

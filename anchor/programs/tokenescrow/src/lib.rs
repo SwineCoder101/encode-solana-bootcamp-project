@@ -9,7 +9,7 @@ use crate::state::admin::config::Status;
 
 pub mod constants;
 
-declare_id!("AsjZ3kWAUSQRNt2pZVeJkywhZ6gpLpHZmJjduPmKZDZZ");
+declare_id!("FaWYFfRyfim5Y8LvQRjEALnApiqima59pVEXFDsjJNYN");
 
 #[program]
 pub mod tokenescrow {

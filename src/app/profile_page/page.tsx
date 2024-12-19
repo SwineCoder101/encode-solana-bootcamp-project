@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { PublicKey } from '@solana/web3.js';
 import { getConnection, getKeypair, getTokenBalance, transferTokens } from '../util/spl-utils';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { USDC_COIN_ADDRESS } from '../config/TokenConfig';
 
 export default function ProjectProfile() {
-  const {publicKey} = useWallet();
+  const {publicKey, signMessage, sendTransaction} = useWallet();
   const [depositAmount, setDepositAmount] = useState<number>(0);
   const [withdrawAmount, setWithdrawAmount] = useState<number>(0);
   const [userBalance, setUserBalance] = useState<number>(0);
@@ -16,15 +16,20 @@ export default function ProjectProfile() {
   const operatorWallet = '9MAocRkm8bcUz2GGM4jNHZ6hWiQbiw5y6uxkV93cjWZ8';
   const userPublicKey = publicKey || new PublicKey(operatorWallet); // Replace with actual user public key
 
+  useEffect(() => {
+    getUserUSDCBalance();
+    getEscrowBalance();
+  }, []);
+
 
   const handleDeposit = async () => {
     try {
       const connection = getConnection();
       const payer = new PublicKey(operatorWallet);
       const recipient = userPublicKey;
-      const mintAddress = new PublicKey('MINT_ADDRESS'); // Replace with actual mint address
+      const mintAddress = new PublicKey(USDC_COIN_ADDRESS);
 
-      const signature = await transferTokens(connection, payer, payer, recipient, mintAddress, depositAmount);
+      const signature = await transferTokens(connection, payer, recipient, mintAddress, depositAmount, sendTransaction,signMessage);
       console.log('Deposit successful, signature:', signature);
     } catch (error) {
       console.error('Error during deposit:', error);
@@ -59,7 +64,7 @@ export default function ProjectProfile() {
   const getUserUSDCBalance = async () => {
     try {
       const connection = getConnection();
-      const mintAddress = new PublicKey('MINT_ADDRESS'); // Replace with actual mint address
+      const mintAddress = new PublicKey(USDC_COIN_ADDRESS); // Replace with actual mint address
 
       const balance = await getTokenBalance(connection, userPublicKey, mintAddress);
       setUserBalance(balance);
@@ -71,8 +76,8 @@ export default function ProjectProfile() {
   const getEscrowBalance = async () => {
     try {
       const connection = getConnection();
-      const escrowPublicKey = new PublicKey('ESCROW_PUBLIC_KEY'); // Replace with actual escrow public key
-      const mintAddress = new PublicKey('MINT_ADDRESS'); // Replace with actual mint address
+      const escrowPublicKey = new PublicKey(operatorWallet); // Replace with actual escrow public key
+      const mintAddress = new PublicKey(USDC_COIN_ADDRESS); // Replace with actual mint address
 
       const balance = await getTokenBalance(connection, escrowPublicKey, mintAddress);
       setEscrowBalance(balance);
