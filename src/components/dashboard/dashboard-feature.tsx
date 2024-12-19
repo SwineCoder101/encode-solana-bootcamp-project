@@ -59,13 +59,12 @@ export default function DashboardFeature() {
 
   return (
     <div>
-      {/* Hero Section */}
-      <AppHero title="Wellcome To our Project" subtitle="" />
+    
+      <AppHero title="Solara" subtitle="" />
 
-      {/* Toast Container */}
+   
       <Toaster position="top-right" />
 
-      {/* Buttons Section */}
       <div className="max-w-xl mx-auto py-6 sm:px-6 lg:px-8 text-center">
         <div className="flex justify-between items-center space-x-4 mb-6">
           {/* Create Project Button */}
@@ -88,7 +87,7 @@ export default function DashboardFeature() {
         </div>
 
         {/* Helpful Links */}
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <p>Here are some helpful links to get you started.</p>
           {links.map((link, index) => (
             <div key={index}>
@@ -97,7 +96,7 @@ export default function DashboardFeature() {
               </a>
             </div>
           ))}
-        </div>
+        </div> */}
       </div>
     </div>
   );
