@@ -4,7 +4,7 @@ import Image from 'next/image';
 export default function Presentation() {
   return (
     <div className="container mx-auto px-4 py-16">
-      <h1 className="text-4xl font-bold mb-8">Carbon Offset DApp</h1>
+      <h1 className="text-4xl font-bold mb-8">Solara</h1>
 
       <section className="mb-16">
         <h2 className="text-2xl font-bold mb-4">Introduction</h2>
