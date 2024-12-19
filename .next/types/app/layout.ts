@@ -1,4 +1,4 @@
-// File: D:\Bootcamp_project\encode-solana-bootcamp-project\src\app\layout.tsx
+// File: /Users/liam/dev/encode-solana-bootcamp-project/src/app/layout.tsx
 import * as entry from '../../../src/app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -54,7 +54,7 @@ export function TokenescrowList() {
 }
 
 function TokenescrowCard({ account }: { account: PublicKey }) {
-  const { accountQuery, incrementMutation, setMutation, decrementMutation, closeMutation } = useTokenescrowProgramAccount({
+  const { accountQuery, setMutation, closeMutation } = useTokenescrowProgramAccount({
     account,
   })
 
@@ -70,13 +70,13 @@ function TokenescrowCard({ account }: { account: PublicKey }) {
             {count}
           </h2>
           <div className="card-actions justify-around">
-            <button
+            {/* <button
               className="btn btn-xs lg:btn-md btn-outline"
               onClick={() => incrementMutation.mutateAsync()}
               disabled={incrementMutation.isPending}
             >
               Increment
-            </button>
+            </button> */}
             <button
               className="btn btn-xs lg:btn-md btn-outline"
               onClick={() => {
@@ -90,13 +90,13 @@ function TokenescrowCard({ account }: { account: PublicKey }) {
             >
               Set
             </button>
-            <button
+            {/* <button
               className="btn btn-xs lg:btn-md btn-outline"
               onClick={() => decrementMutation.mutateAsync()}
               disabled={decrementMutation.isPending}
             >
               Decrement
-            </button>
+            </button> */}
           </div>
           <div className="text-center space-y-4">
             <p>
