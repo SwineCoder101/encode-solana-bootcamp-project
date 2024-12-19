@@ -28,7 +28,7 @@ export const getKeypair = (): Keypair => {
  * @returns {Connection} The Solana connection.
  */
 export const getConnection = (): Connection => {
-    return new Connection(DEVNET);
+    return new Connection('https://api.devnet.solana.com');
 };
 
 
