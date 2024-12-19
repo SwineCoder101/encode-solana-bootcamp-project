@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/tokenescrow.json`.
  */
 export type Tokenescrow = {
-  "address": "AsjZ3kWAUSQRNt2pZVeJkywhZ6gpLpHZmJjduPmKZDZZ",
+  "address": "FaWYFfRyfim5Y8LvQRjEALnApiqima59pVEXFDsjJNYN",
   "metadata": {
     "name": "tokenescrow",
     "version": "0.1.0",
