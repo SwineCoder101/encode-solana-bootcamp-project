@@ -67,24 +67,6 @@ export function useTokenescrowProgramAccount({ account }: { account: PublicKey }
     },
   })
 
-  const decrementMutation = useMutation({
-    mutationKey: ['tokenescrow', 'decrement', { cluster, account }],
-    mutationFn: () => program.methods.decrement().accounts({ tokenescrow: account }).rpc(),
-    onSuccess: (tx) => {
-      transactionToast(tx)
-      return accountQuery.refetch()
-    },
-  })
-
-  const incrementMutation = useMutation({
-    mutationKey: ['tokenescrow', 'increment', { cluster, account }],
-    mutationFn: () => program.methods.increment().accounts({ tokenescrow: account }).rpc(),
-    onSuccess: (tx) => {
-      transactionToast(tx)
-      return accountQuery.refetch()
-    },
-  })
-
   const setMutation = useMutation({
     mutationKey: ['tokenescrow', 'set', { cluster, account }],
     mutationFn: (value: number) => program.methods.set(value).accounts({ tokenescrow: account }).rpc(),
@@ -97,8 +79,6 @@ export function useTokenescrowProgramAccount({ account }: { account: PublicKey }
   return {
     accountQuery,
     closeMutation,
-    decrementMutation,
-    incrementMutation,
     setMutation,
   }
 }
