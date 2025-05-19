@@ -10,8 +10,8 @@ export default function ProjectProfile() {
   const {publicKey, signMessage, sendTransaction} = useWallet();
   const [depositAmount, setDepositAmount] = useState<number>(0);
   const [withdrawAmount, setWithdrawAmount] = useState<number>(0);
-  const [userBalance, setUserBalance] = useState<number>(0);
-  const [escrowBalance, setEscrowBalance] = useState<number>(0);
+  const [userBalance, setUserBalance] = useState<number>(1000);
+  const [escrowBalance, setEscrowBalance] = useState<number>(1000000);
 
   const operatorWallet = '9MAocRkm8bcUz2GGM4jNHZ6hWiQbiw5y6uxkV93cjWZ8';
   const userPublicKey = publicKey || new PublicKey(operatorWallet); // Replace with actual user public key
